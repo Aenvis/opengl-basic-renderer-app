@@ -9,33 +9,31 @@ void ProcessInput(GLFWwindow* window);
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
 
+//shaders
 const char* vertexShaderSource = "#version 460 core\n"
 "layout (location = 0) in vec3 aPos;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"void main(){\n"
+"gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n"
 "}\0";
 
 const char* fragmentShaderSource = "#version 460 core\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-"}\0"
-;
+"out vec4 fragColor;\n"
+"void main(){\n"
+"fragColor = vec4(1.0f, 1.0f, 0.01f, 1.0f);\n"
+"}\0";
 
 int main()
 {
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "openGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "openGL exercise", NULL, NULL);
 
-	if (window == NULL)
+	if (!window)
 	{
-		std::cout << "Failed to create GLFW window.\n";
+		std::cout << "ERROR::GLFW::WINDOW::CREATION_FAILED\n";
 		glfwTerminate();
 		return -1;
 	}
@@ -45,47 +43,45 @@ int main()
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		std::cout << "Failed to initialize GLAD\n";
+		std::cout << "ERROR::GLAD::INITIALIZATION_FAILED\n";
 		return -1;
 	}
-	//compile vertex shader
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+
+	//bind and compile shader program
+	unsigned int vertexShader, fragmentShader;
+	vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
 	glCompileShader(vertexShader);
 
-	//check if compilation succeeded
 	int success;
 	char infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
 		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
 
-	//compile fragment shader
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
 	glCompileShader(fragmentShader);
 
-	//check if compilation succeeded
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-
 	if (!success)
 	{
 		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
 
-	//create shader program
-	unsigned int shaderProgram = glCreateProgram();
+	unsigned int shaderProgram;
+	shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
 	glLinkProgram(shaderProgram);
 
-	//check if linking succeeded
-	glGetShaderiv(shaderProgram, GL_LINK_STATUS, &success);
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
 
 	if (!success)
 	{
@@ -93,45 +89,32 @@ int main()
 		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
 	}
 
-	//delete shaders - no longer needed after linking
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	//use only unique vertices and then pass the indices order to draw triangles - indexed drawing
-	float vertices[] = {
-	 0.5f,  0.5f, 0.0f,  // top right
-	 0.5f, -0.5f, 0.0f,  // bottom right
-	-0.5f, -0.5f, 0.0f,  // bottom left
-	-0.5f,  0.5f, 0.0f   // top left 
-	};
-	unsigned int indices[] = {
-		0, 1, 3,   // first triangle
-		1, 2, 3    // second triangle
+	float vertices[] =
+	{
+		-0.9f, -0.7f, 0.f,
+		-0.3f, -0.7f, 0.f,
+		-0.6f,  0.f,  0.f,
+		-0.3f, -0.7f, 0.f,
+		 0.3f,  -0.7f, 0.f,
+		 0.0f,  0.f,  0.f,
 	};
 
-	//generate objects
-	unsigned int vertexArrayObject, vertexBufferObject, elementBufferObject;
-	glGenVertexArrays(1, &vertexArrayObject);
-	glGenBuffers(1, &vertexBufferObject);
-	glGenBuffers(1, &elementBufferObject);
+	unsigned int VAO, VBO;
 
-	//bind Vertex Array Object (VAO)
-	glBindVertexArray(vertexArrayObject);
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
 
-	//allocate buffer in gpu's memory, then pass the vertices data as an array
-	//bind Vertex Buffer Object (VBO)
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 
+	glBindVertexArray(VAO);
 
-	//bind Element Buffer Object (EBO)
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
 
-	//specify how openGL should interpret vertices data
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, (void*)0);
 	glEnableVertexAttribArray(0);
 
-	//after glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object, we can safely unbind 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	//main loop
@@ -142,20 +125,17 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
 
-		//sets the given shaderProgram as active and as a current shader program for drawing
 		glUseProgram(shaderProgram);
-		glBindVertexArray(vertexArrayObject);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	glDeleteVertexArrays(1, &vertexArrayObject);
-	glDeleteBuffers(1, &vertexBufferObject);
-	glDeleteBuffers(1, &elementBufferObject);
+
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
 	glDeleteProgram(shaderProgram);
-	glBindVertexArray(0);
 	glfwTerminate();
 	return 0;
 }
