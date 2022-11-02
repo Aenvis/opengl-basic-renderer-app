@@ -5,6 +5,10 @@
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void ProcessInput(GLFWwindow* window);
 
+//settings
+const unsigned int SCREEN_WIDTH = 800;
+const unsigned int SCREEN_HEIGHT = 600;
+
 const char* vertexShaderSource = "#version 460 core\n"
 "layout (location = 0) in vec3 aPos;\n"
 "void main()\n"
@@ -27,7 +31,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "openGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "openGL", NULL, NULL);
 
 	if (window == NULL)
 	{
@@ -44,44 +48,6 @@ int main()
 		std::cout << "Failed to initialize GLAD\n";
 		return -1;
 	}
-
-	glViewport(0, 0, 800, 600);
-
-	//use only unique vertices and then pass the indices order to draw triangles - indexed drawing
-	float vertices[] = {
-	 0.5f,  0.5f, 0.0f,  // top right
-	 0.5f, -0.5f, 0.0f,  // bottom right
-	-0.5f, -0.5f, 0.0f,  // bottom left
-	-0.5f,  0.5f, 0.0f   // top left 
-	};
-	unsigned int indices[] = {
-		0, 1, 3,   // first triangle
-		1, 2, 3    // second triangle
-	};
-
-	//generate Element Buffer Object (EBO)
-	unsigned int elementBufferObject;
-	glGenBuffers(1, &elementBufferObject);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	
-	//generate Vertex Array Object (VAO)
-	unsigned int vertexArrayObject;
-	glGenVertexArrays(1, &vertexArrayObject);
-	glBindVertexArray(vertexArrayObject);
-	
-	/* DRAW TRIANGLE USING VERTEX BUFFER OBJECT - based on vertices
-	//allocate buffer in gpu's memory, then pass the vertices data as an array
-	unsigned int vertexBufferObject; //VBO
-	glGenBuffers(1, &vertexBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 
-	*/
-
-	//specify how openGL should interpret vertices data
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
-	glEnableVertexAttribArray(0);
-
 	//compile vertex shader
 	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -131,23 +97,64 @@ int main()
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	//sets the given shaderProgram as active and as a current shader program for drawing
-	glUseProgram(shaderProgram);
+	//use only unique vertices and then pass the indices order to draw triangles - indexed drawing
+	float vertices[] = {
+	 0.5f,  0.5f, 0.0f,  // top right
+	 0.5f, -0.5f, 0.0f,  // bottom right
+	-0.5f, -0.5f, 0.0f,  // bottom left
+	-0.5f,  0.5f, 0.0f   // top left 
+	};
+	unsigned int indices[] = {
+		0, 1, 3,   // first triangle
+		1, 2, 3    // second triangle
+	};
 
-	//glBindVertexArray(vertexArrayObject);
+	//generate objects
+	unsigned int vertexArrayObject, vertexBufferObject, elementBufferObject;
+	glGenVertexArrays(1, &vertexArrayObject);
+	glGenBuffers(1, &vertexBufferObject);
+	glGenBuffers(1, &elementBufferObject);
+
+	//bind Vertex Array Object (VAO)
+	glBindVertexArray(vertexArrayObject);
+
+	//allocate buffer in gpu's memory, then pass the vertices data as an array
+	//bind Vertex Buffer Object (VBO)
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 
+
+	//bind Element Buffer Object (EBO)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	//specify how openGL should interpret vertices data
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+	glEnableVertexAttribArray(0);
+
+	//after glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object, we can safely unbind 
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	//main loop
 	while (!glfwWindowShouldClose(window))
 	{
 		ProcessInput(window);
+
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
-		glDrawElements(GL_TRIANGLES, 0, 3);
+
+		//sets the given shaderProgram as active and as a current shader program for drawing
+		glUseProgram(shaderProgram);
+		glBindVertexArray(vertexArrayObject);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
+	glDeleteVertexArrays(1, &vertexArrayObject);
+	glDeleteBuffers(1, &vertexBufferObject);
+	glDeleteBuffers(1, &elementBufferObject);
+	glDeleteProgram(shaderProgram);
+	glBindVertexArray(0);
 	glfwTerminate();
 	return 0;
 }
