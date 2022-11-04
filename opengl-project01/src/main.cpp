@@ -92,30 +92,36 @@ int main()
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	float vertices[] =
+	float firstTriangle[] =
 	{
 		-0.9f, -0.7f, 0.f,
 		-0.3f, -0.7f, 0.f,
-		-0.6f,  0.f,  0.f,
-		-0.3f, -0.7f, 0.f,
-		 0.3f,  -0.7f, 0.f,
-		 0.0f,  0.f,  0.f,
+		-0.6f,  0.f,  0.f
 	};
 
-	unsigned int VAO, VBO;
+	float secondTriangle[] =
+	{
+		-0.3f, -0.7f, 0.f,
+		 0.3f, -0.7f, 0.f,
+		 0.0f,  0.f,  0.f
+	};
 
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
+	unsigned int VAO[2], VBO[2];
 
-	glBindVertexArray(VAO);
+	glGenVertexArrays(2, VAO);
+	glGenBuffers(2, VBO);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
-
+	glBindVertexArray(VAO[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(firstTriangle), &firstTriangle, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(VAO[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(secondTriangle), &secondTriangle, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0); // 0 instead of sizeof(float) * 3, because in such situation where data is tightly packed openGL will figure out how to interpret that
+	glEnableVertexAttribArray(0);
 
 	//main loop
 	while (!glfwWindowShouldClose(window))
@@ -125,17 +131,22 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
 
-		glUseProgram(shaderProgram);
-		glBindVertexArray(VAO);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glUseProgram(shaderProgram);
+		glBindVertexArray(VAO[0]);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glUseProgram(shaderProgram);
+		glBindVertexArray(VAO[1]);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(2, VAO);
+	glDeleteBuffers(2, VBO);
 	glDeleteProgram(shaderProgram);
 	glfwTerminate();
 	return 0;
