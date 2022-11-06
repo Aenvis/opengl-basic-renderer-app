@@ -38,10 +38,11 @@ int main()
 	Shader myShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
 
 	float vertexData[] =
-	{	//pos			   //vertex color
-		-0.9f, -0.7f, 0.f, 1.f, 0.f, 0.f,
-		-0.3f, -0.7f, 0.f, 0.f, 1.f, 0.f,
-		-0.6f,  0.f,  0.f, 0.f, 0.f, 1.f
+	{
+		// positions         // colors
+		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
+		-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
+		 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
 	};
 
 	unsigned int VAO, VBO;
