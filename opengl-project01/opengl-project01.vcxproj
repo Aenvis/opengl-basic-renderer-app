@@ -169,10 +169,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\stb_image.h" />
+    <ClInclude Include="src\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\shaders\fragment.glsl" />
-    <None Include="src\shaders\vertex.glsl" />
+    <None Include="resources\shaders\fragment.glsl" />
+    <None Include="resources\shaders\vertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

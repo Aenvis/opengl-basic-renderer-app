@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "Shader.h"
+#include "stb_image.cpp"
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void ProcessInput(GLFWwindow* window);
@@ -35,14 +36,26 @@ int main()
 		return -1;
 	}
 
-	Shader myShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
+	//load texture
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("../container.jpg", &width, &height, &nrChannels, 0);
+
+	//generate and bind texture
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	Shader myShader("resources/shaders/vertex.glsl", "resources/shaders/fragment.glsl");
 
 	float vertexData[] =
 	{
-		// positions         // colors
-		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // bottom right
-		-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // bottom left
-		 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // top 
+		// positions         // uv map
+		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f,   // bottom right
+		-0.5f, -0.5f, 0.0f,  0.0f, 0.0f,   // bottom left
+		 0.0f,  0.5f, 0.0f,  0.5f, 1.0f    // top 
 	};
 
 	unsigned int VAO, VBO;
@@ -56,11 +69,11 @@ int main()
 
 	//vertices position
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*6, (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*5, (void*)0);
 
 	//vertices color
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*6, (void*)(sizeof(float)*3));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float)*5, (void*)(sizeof(float)*3));
 
 	//main loop
 	while (!glfwWindowShouldClose(window))
@@ -68,7 +81,7 @@ int main()
 		ProcessInput(window);
 
 		glClear(GL_COLOR_BUFFER_BIT);
-		glClearColor(0.2f, 0.3f, 0.4f, 1.0f);
+		glClearColor(0.2f, 0.3f, 0.5f, 1.0f);
 
 		myShader.Use();
 		glBindVertexArray(VAO);
