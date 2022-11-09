@@ -9,6 +9,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
 	std::string vertexSourceCode;
 	std::string fragmentSourceCode;
+
 	std::ifstream vertexShaderFile;
 	std::ifstream fragmentShaderFile;
 	vertexShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
