@@ -92,12 +92,12 @@ void Shader::SetBool(const std::string& name, bool val) const
 	glUniform1i(glGetUniformLocation(ID, name.c_str()), static_cast<int>(val));
 }
 
-void Shader::SetInt(const std::string& name, bool val) const
+void Shader::SetInt(const std::string& name, int val) const
 {
 	glUniform1i(glGetUniformLocation(ID, name.c_str()), val);
 }
 
-void Shader::SetFloat(const std::string& name, bool val) const
+void Shader::SetFloat(const std::string& name, float val) const
 {
 	glUniform1f(glGetUniformLocation(ID, name.c_str()), val);
 }
