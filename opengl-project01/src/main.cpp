@@ -1,6 +1,9 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/matrix.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "Shader.h"
 #include "stb_image.cpp"
 
@@ -85,8 +88,8 @@ int main()
 	glGenTextures(1, &texture1);
 	glBindTexture(GL_TEXTURE_2D, texture1);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -95,7 +98,7 @@ int main()
 	//load texture
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true);
-	unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load("capybara.png", &width, &height, &nrChannels, 0);
 	
 	if (data)
 	{
@@ -117,7 +120,7 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+	data = stbi_load("loveframe.png", &width, &height, &nrChannels, 4);
 
 	if (data)
 	{
@@ -130,9 +133,14 @@ int main()
 	}
 	stbi_image_free((void*)data);
 
+
 	myShader.Use();
 	myShader.SetInt("objTexture1", 0);
 	myShader.SetInt("objTexture2", 1);
+	unsigned int transformLoc = glGetUniformLocation(myShader.GetId(), "transform");
+
+	float xIt(0.0f);
+	bool goingRight = true;
 
 	//main loop
 	while (!glfwWindowShouldClose(window))
@@ -140,7 +148,7 @@ int main()
 		ProcessInput(window);
 
 		myShader.SetFloat("mixValue", mix);
-		std::cout << "MIX::VAL << " << mix << std::endl;
+		//std::cout << "MIX::VAL << " << mix << std::endl;
 		
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClearColor(0.2f, 0.3f, 0.5f, 1.0f);
@@ -149,6 +157,25 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, texture1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
+
+		glm::mat4 transform = glm::mat4(1.f);
+		glm::mat4 transform1 = glm::mat4(1.f);
+
+		float scalar = 0.5f * static_cast<float>(sin(glfwGetTime()));
+
+		transform = glm::translate(transform, glm::vec3(scalar, 0.0f, 0.0f));
+		transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		transform = glm::scale(transform, glm::vec3(0.3f, 0.3f, 0.3f));
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+		myShader.Use();
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		transform1 = glm::translate(transform1, glm::vec3(0.8f, 0.8f, 0.0f));
+		transform1 = glm::rotate(transform1, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		transform1 = glm::scale(transform1, glm::vec3(scalar, scalar, scalar));
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform1));
 
 		myShader.Use();
 		glBindVertexArray(VAO);
@@ -172,13 +199,13 @@ void ProcessInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 	{
-		mix += 0.001f;
+		mix += 0.01f;
 		if (mix >= 1.0f) mix = 1.0f;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 	{
-		mix -= 0.001f;
+		mix -= 0.01f;
 		if (mix <= 0.0f) mix = 0.0f;
 	}
 }
