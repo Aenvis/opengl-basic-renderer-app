@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <glm/matrix.hpp>
 class Shader
 {
 private:
@@ -14,5 +15,6 @@ public:
 	void SetBool(const std::string& name, bool val) const;
 	void SetInt(const std::string& name, int val) const;
 	void SetFloat(const std::string& name, float val) const;
+	void SetMat4(const std::string& name, glm::mat4 mat) const;
 };
 

@@ -3,6 +3,10 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <glm/glm.hpp>
+#include <glm/matrix.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	: m_id(glCreateProgram())
@@ -105,4 +109,10 @@ void Shader::SetInt(const std::string& name, int val) const
 void Shader::SetFloat(const std::string& name, float val) const
 {
 	glUniform1f(glGetUniformLocation(m_id, name.c_str()), val);
+}
+
+
+void Shader::SetMat4(const std::string& name, glm::mat4 mat) const
+{
+	glUniformMatrix4fv(glGetUniformLocation(m_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
