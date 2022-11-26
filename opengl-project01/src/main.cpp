@@ -4,10 +4,16 @@
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "Shader.h"
+#include "shaders/Shader.h"
 #include "stb_image.cpp"
+#include "renderer/VertexBuffer.h"
+#include "renderer/VertexArray.h"
+#include "renderer/Window.h"
+#include "renderer/Texture.h"
 
-void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+using namespace renderer;
+
+void Init(unsigned int major, unsigned int minor);
 void ProcessInput(GLFWwindow* window);
 
 //settings
@@ -16,30 +22,11 @@ const unsigned int SCREEN_HEIGHT = 600;
 
 int main()
 {
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	Init(4, 6);
 
-	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "openGL exercise", NULL, NULL);
+	MainWindow window(SCREEN_WIDTH, SCREEN_HEIGHT, "Wojtek");
 
-	if (!window)
-	{
-		std::cout << "ERROR::GLFW::WINDOW::CREATION_FAILED\n";
-		glfwTerminate();
-		return -1;
-	}
-
-	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
-
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		std::cout << "ERROR::GLAD::INITIALIZATION_FAILED\n";
-		return -1;
-	}
-
-	Shader myShader("resources/shaders/vertex.glsl", "resources/shaders/fragment.glsl");
+	Shader myShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
 
 	float vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -98,26 +85,18 @@ int main()
 	glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
-	unsigned int VBO, VAO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	VertexArray vArray;
+	VertexBuffer vBuffer(vertices, sizeof(vertices));
 
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+	vArray.VertexAttribPtr(0, 3, 5 * sizeof(float), (void*)0);
 	// texture coord attribute
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+	vArray.VertexAttribPtr(1, 2, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
-	//generate and bind texture
-	unsigned int texture1, texture2;
-	glGenTextures(1, &texture1);
-	glBindTexture(GL_TEXTURE_2D, texture1);
+	//------------
+	//textures - generate and load textures
+	//------------
+	Texture texture1;
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -125,89 +104,69 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	texture1.Load("capybara.png", true);
 
-	//load texture
-	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(true);
-	unsigned char* data = stbi_load("capybara.png", &width, &height, &nrChannels, 4);
+	Texture texture2;
 	
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "FAILED TO LOAD TEXTURE\n";
-	}
-	stbi_image_free((void*)data);
-
-	glGenTextures(1, &texture2);
-	glBindTexture(GL_TEXTURE_2D, texture2);
-
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	data = stbi_load("frame.png", &width, &height, &nrChannels, 4);
+	texture2.Load("frame.png", true);
 
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "FAILED TO LOAD TEXTURE\n";
-	}
-	stbi_image_free(data);
-
+	//------------
+	//maths - local coordinates to screen perspective view
+	//------------
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 projection = glm::mat4(1.0f);
 
-	view = glm::translate(view, glm::vec3(0.f, 0.0f, -3.0f));
-	projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.f);
+	view = glm::translate(view, glm::vec3(-2.0f, 0.0f, -6.0f));
+	projection = glm::perspective(glm::radians(55.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.f);
 	glEnable(GL_DEPTH_TEST);
+
 	//main loop
-	while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(window.Get()))
 	{
-		ProcessInput(window);
+		ProcessInput(window.Get());
 		
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture1);
+		glBindTexture(GL_TEXTURE_2D, texture1.GetID());
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture2);
+		glBindTexture(GL_TEXTURE_2D, texture2.GetID());
 
 		myShader.Use();
 		myShader.SetInt("objTexture1", 0);
 		myShader.SetInt("objTexture2", 1);
 
-		glBindVertexArray(VAO);
+		vArray.Bind();
 		for (size_t i = 0; i < 10; i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePositions[i]);
-			model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+			model = i%3 ? model : glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
 
 			glm::mat4 mvp = projection * view * model;
 			myShader.SetMat4("mvp", mvp);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(window.Get());
 		glfwPollEvents();
 	}
-
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glfwTerminate();
 	return 0;
+}
+
+void Init(unsigned int major, unsigned int minor)
+{
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 }
 
 void ProcessInput(GLFWwindow* window)
@@ -216,8 +175,4 @@ void ProcessInput(GLFWwindow* window)
 		glfwSetWindowShouldClose(window, 1);
 }
 
-void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
-{
-	glViewport(0, 0, width, height);
-}
 

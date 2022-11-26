@@ -163,18 +163,38 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\renderer\ElementBuffer.cpp" />
+    <ClCompile Include="src\renderer\Texture.cpp" />
+    <ClCompile Include="src\renderer\VertexArray.cpp" />
+    <ClCompile Include="src\renderer\VertexBuffer.cpp" />
+    <ClCompile Include="src\renderer\Window.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\shaders\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\renderer\ElementBuffer.h" />
+    <ClInclude Include="src\renderer\Texture.h" />
+    <ClInclude Include="src\renderer\VertexArray.h" />
+    <ClInclude Include="src\renderer\VertexBuffer.h" />
+    <ClInclude Include="src\renderer\Window.h" />
     <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\shaders\Shader.h" />
     <ClInclude Include="src\stb_image.h" />
     <ClInclude Include="src\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\fragment.glsl" />
     <None Include="resources\shaders\vertex.glsl" />
+    <None Include="src\shaders\fragment.glsl" />
+    <None Include="src\shaders\vertex.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="awesomeface.png" />
+    <Image Include="capybara.png" />
+    <Image Include="container.jpg" />
+    <Image Include="frame.png" />
+    <Image Include="loveframe.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
