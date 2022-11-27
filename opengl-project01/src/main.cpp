@@ -10,30 +10,26 @@
 #include "renderer/VertexArray.h"
 #include "renderer/Window.h"
 #include "renderer/Texture.h"
+#include "renderer/Camera.h"
 
 using namespace renderer;
 
 void Init(unsigned int major, unsigned int minor);
 void ProcessInput(GLFWwindow* window);
-void mouseCallback(GLFWwindow* window, double xpos, double ypos);
+void mouseCallback(GLFWwindow* window, double xposIn, double yposIn);
 void scrollCallback(GLFWwindow* window, double xpos, double ypos);
 
 //settings
 const unsigned int SCREEN_WIDTH = 1280;
 const unsigned int SCREEN_HEIGHT = 720;
 
-glm::vec3 cameraPos(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraForward(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
-
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 //mouse input
-float pitch = 0.0f, yaw = -90.0f;
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCREEN_WIDTH / 2;
 float lastY = SCREEN_HEIGHT / 2;
-float fov = 45.0f;
 bool firstMouseInput = true;
 
 int main()
@@ -134,12 +130,9 @@ int main()
 
 	texture2.Load("frame.png", true);
 
-	//------------
-	// maths - local coordinates to screen perspective view
-	//------------
-	//glm::mat4 view(1.0f);
-
-	//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
+	myShader.Use();
+	myShader.SetInt("objTexture1", 0);
+	myShader.SetInt("objTexture2", 1);
 
 	// zbuffer
 	glEnable(GL_DEPTH_TEST);
@@ -153,7 +146,7 @@ int main()
 	//main loop
 	while (!glfwWindowShouldClose(window.Get()))
 	{
-		float currentFrame = glfwGetTime();
+		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 		int fps = static_cast<int>(1.0f / deltaTime);
@@ -163,6 +156,7 @@ int main()
 
 		std::cout.precision(2);
 		std::cout << fps << " fps :: " << deltaTime << " ms\n";
+
 		ProcessInput(window.Get());
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -174,28 +168,20 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, texture2.GetID());
 
 		myShader.Use();
-		myShader.SetInt("objTexture1", 0);
-		myShader.SetInt("objTexture2", 1);
-
-		vArray.Bind();
 
 		//------------
 		// camera and movement
 		//------------
-		glm::vec3 direction{};
-		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		direction.y = sin(glm::radians(pitch));
-		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-		cameraForward = glm::normalize(direction);
-
-		glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraForward, cameraUp);
-		glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.f);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.f);
+		glm::mat4 view = camera.GetViewMatrix();
 		
+		vArray.Bind();
+
 		for (size_t i = 0; i < 10; i++)
 		{
 			glm::mat4 model(1.0f);
 			model = glm::translate(model, cubePositions[i]);
-			model = i%3 ? model : glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+			model = i % 3 ? model : glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
 
 			//mvp stands for model view projection
 			glm::mat4 mvp = projection * view * model;
@@ -221,57 +207,46 @@ void Init(unsigned int major, unsigned int minor)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 }
-
+ 
 void ProcessInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, 1);
 
-	const float cameraSpeed = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? 4.0f : 2.5f) * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		cameraPos += cameraSpeed * cameraForward;
+		camera.ProcessKeyboard(FORWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		cameraPos -= cameraSpeed * cameraForward;
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		cameraPos -= glm::normalize(glm::cross(cameraForward, cameraUp)) * cameraSpeed;
+		camera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		cameraPos += glm::normalize(glm::cross(cameraForward, cameraUp)) * cameraSpeed;
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-		cameraPos.y -= cameraSpeed;
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-		cameraPos.y += cameraSpeed;
+		camera.ProcessKeyboard(RIGHT, deltaTime);
+
 }
 
-void mouseCallback(GLFWwindow* window, double xpos, double ypos)
+void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 {
+	float xpos = static_cast<float>(xposIn);
+	float ypos = static_cast<float>(yposIn);
+
 	if (firstMouseInput)
 	{
-		lastX = (float)xpos;
-		lastY = (float)ypos;
+		lastX = xpos;
+		lastY = ypos;
 		firstMouseInput = false;
 	}
 
-	float xoffset = (float)xpos - lastX;
-	float yoffset = (float)ypos - lastY;
-	lastX = (float)xpos;
-	lastY = (float)ypos;
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
 
-	const float sensitivity = 0.1f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-	yaw += xoffset;
-	pitch -= yoffset;
-
-	if (pitch > 89.0f) pitch = 89.0f;
-	if (pitch < -89.0f) pitch = -89.0f;
+	camera.ProcessMouseMovement(xoffset, yoffset, true);
 }
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	const float scrollSpeedMultiplier = 3.0f;
-	fov -= (float)yoffset * scrollSpeedMultiplier;
-	if (fov < 1.0f) fov = 1.0f;
-	if (fov > 55.0f) fov = 55.0f;
+	camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
 

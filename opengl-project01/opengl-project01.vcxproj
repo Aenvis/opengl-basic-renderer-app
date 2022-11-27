@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\renderer\Camera.cpp" />
     <ClCompile Include="src\renderer\ElementBuffer.cpp" />
     <ClCompile Include="src\renderer\Texture.cpp" />
     <ClCompile Include="src\renderer\VertexArray.cpp" />
@@ -173,6 +174,7 @@
     <ClCompile Include="src\shaders\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\renderer\Camera.h" />
     <ClInclude Include="src\renderer\ElementBuffer.h" />
     <ClInclude Include="src\renderer\Texture.h" />
     <ClInclude Include="src\renderer\VertexArray.h" />
