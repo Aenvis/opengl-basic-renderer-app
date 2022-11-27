@@ -51,6 +51,8 @@ namespace renderer
 		case RIGHT:		m_position += m_right * velocity; break;
 		default:		std::cerr << "Invalid direction in Camera::ProcessKeyboard" << std::endl; break;
 		}
+
+		m_position.y = 0.0f;
 	}
 	void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch)
 	{
