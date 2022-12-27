@@ -25,7 +25,6 @@ const unsigned int SCREEN_HEIGHT = 720;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
 //mouse input
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCREEN_WIDTH / 2;
@@ -34,7 +33,7 @@ bool firstMouseInput = true;
 
 int main()
 {
-	Init(4, 6);
+	Init(3, 3);
 
 	MainWindow window(SCREEN_WIDTH, SCREEN_HEIGHT, "Wojtek");
 	glfwSetInputMode(window.Get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
