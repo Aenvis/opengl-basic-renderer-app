@@ -23,22 +23,32 @@ void ProcessInput(GLFWwindow* window);
 void mouseCallback(GLFWwindow* window, double xposIn, double yposIn);
 void scrollCallback(GLFWwindow* window, double xpos, double ypos);
 
-//settings
+//-------------
+// SCREEN
+//-------------
 const unsigned int SCREEN_WIDTH = 1280;
 const unsigned int SCREEN_HEIGHT = 720;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-//mouse input
+//-------------
+// MOUSE INPUT
+//-------------
 Camera camera(glm::vec3(1.0f, 1.0f, 5.0f));
 float lastX = SCREEN_WIDTH / 2.0f;
 float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouseInput = true;
 bool isMouseFocused = true;
 
+//-------------
+// RENDER PARAMS
+//-------------
 glm::vec3 lightPos(1.0f, 2.0f, 2.0f);
-
+float ambientStrength = 0.0f;
+float specularStrength = 0.5f;
+float lampSpeedMultiplicator = 1.0f;
+float lampMoveRange = 1.0f;
 int main()
 {
 	Init(3, 3);
@@ -182,12 +192,13 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		lightPos.x = 6.0f * sin(static_cast<float>(glfwGetTime()));
-		lightPos.z = 6.0f * cos(static_cast<float>(glfwGetTime()));
+		lightPos.x = lampMoveRange * sin(static_cast<float>(glfwGetTime()) * lampSpeedMultiplicator);
+		lightPos.z = lampMoveRange * cos(static_cast<float>(glfwGetTime()) * lampSpeedMultiplicator);
 
 		cubeShader.Use();
 		cubeShader.SetVec3("lightPos", lightPos);
-		cubeShader.SetVec3("cameraPos", camera.GetPosition());
+		cubeShader.SetFloat("ambientStrength", ambientStrength);
+		cubeShader.SetFloat("specularStrength", specularStrength);
 		cubeShader.SetVec3("objectColor", 0.2f, 0.7f, 0.91f);
 		cubeShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 
@@ -221,8 +232,14 @@ int main()
 		lampVAO.Bind();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		ImGui::Begin("IMGUI window");
-		ImGui::Text("github/Aenvis");
+		ImGui::Begin("Cube Material Params");
+		ImGui::SliderFloat("ambient", &ambientStrength, 0.0f, 1.0f);
+		ImGui::SliderFloat("specular", &specularStrength, 0.0f, 1.0f);
+		ImGui::End();
+
+		ImGui::Begin("Lamp Params");
+		ImGui::InputScalar("MoveSpeed Multiplication", ImGuiDataType_Float, &lampSpeedMultiplicator);
+		ImGui::InputScalar("Move Range", ImGuiDataType_Float, &lampMoveRange);
 		ImGui::End();
 
 		ImGui::Render();
