@@ -18,6 +18,8 @@
 
 using namespace renderer;
 
+int main();
+
 void Init(unsigned int major, unsigned int minor);
 void ProcessInput(GLFWwindow* window);
 void mouseCallback(GLFWwindow* window, double xposIn, double yposIn);
@@ -47,6 +49,7 @@ bool isMouseFocused = true;
 glm::vec3 lightPos(1.0f, 2.0f, 2.0f);
 float ambientStrength = 0.0f;
 float specularStrength = 0.5f;
+int specularCoeff = 4;
 float lampSpeedMultiplicator = 1.0f;
 float lampMoveRange = 1.0f;
 int main()
@@ -169,6 +172,8 @@ int main()
 	int maxFps = INT_MIN;
 	const float startTime = static_cast<float>(glfwGetTime());
 
+	const char* specularCoefficients[] = { "1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024" };
+
 	//main loop
 	while (!glfwWindowShouldClose(window.Get()))
 	{
@@ -199,6 +204,7 @@ int main()
 		cubeShader.SetVec3("lightPos", lightPos);
 		cubeShader.SetFloat("ambientStrength", ambientStrength);
 		cubeShader.SetFloat("specularStrength", specularStrength);
+		cubeShader.SetInt("specularCoefficient", glm::pow(2, specularCoeff));
 		cubeShader.SetVec3("objectColor", 0.2f, 0.7f, 0.91f);
 		cubeShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 
@@ -235,11 +241,13 @@ int main()
 		ImGui::Begin("Cube Material Params");
 		ImGui::SliderFloat("ambient", &ambientStrength, 0.0f, 1.0f);
 		ImGui::SliderFloat("specular", &specularStrength, 0.0f, 1.0f);
+		ImGui::SliderFloat("specular", &specularStrength, 0.0f, 1.0f);
+		ImGui::ListBox("Specular coeff", &specularCoeff, specularCoefficients, IM_ARRAYSIZE(specularCoefficients));
 		ImGui::End();
 
 		ImGui::Begin("Lamp Params");
-		ImGui::InputScalar("MoveSpeed Multiplication", ImGuiDataType_Float, &lampSpeedMultiplicator);
-		ImGui::InputScalar("Move Range", ImGuiDataType_Float, &lampMoveRange);
+		ImGui::SliderFloat("Move Speed", &lampSpeedMultiplicator, 0.0f, 3.0f);
+		ImGui::SliderFloat("Move Range", &lampMoveRange, 0.0f, 8.0f);
 		ImGui::End();
 
 		ImGui::Render();
