@@ -27,25 +27,31 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 //mouse input
-Camera camera(glm::vec3(0.0f, 1.0f, -3.0f));
-float lastX = SCREEN_WIDTH / 2;
-float lastY = SCREEN_HEIGHT / 2;
+Camera camera(glm::vec3(1.0f, 1.0f, 5.0f));
+float lastX = SCREEN_WIDTH / 2.0f;
+float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouseInput = true;
 
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+const glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 int main()
 {
-	Init(4, 6);
+	Init(3, 3);
 
 	MainWindow window(SCREEN_WIDTH, SCREEN_HEIGHT, "Wojtek");
 	glfwSetInputMode(window.Get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window.Get(), mouseCallback);
 	glfwSetScrollCallback(window.Get(), scrollCallback);
+
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "ERROR::GLAD::INITIALIZATION_FAILED\n";
+	}
+
 	Shader cubeShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
 	Shader lampShader("src/shaders/vertexLight.glsl", "src/shaders/fragmentLight.glsl");
 
-	float vertices[] = {
+	const float vertices[] = {
 	-0.5f, -0.5f, -0.5f,
 	 0.5f, -0.5f, -0.5f,
 	 0.5f,  0.5f, -0.5f,
@@ -90,14 +96,14 @@ int main()
 	};
 
 	VertexArray cubeVAO;
-	VertexArray lampVAO;
 	VertexBuffer vBuffer(vertices, sizeof(vertices));
 
 	// position attribute
-	cubeVAO.VertexAttribPtr(0, 3, 3 * sizeof(float), (void*)0);
+	cubeVAO.VertexAttribPtr(0, 3, 3 * sizeof(float), nullptr);
 	
+	VertexArray lampVAO;
 	vBuffer.Bind();
-	lampVAO.VertexAttribPtr(0, 3, 3 * sizeof(float), (void*)0);
+	lampVAO.VertexAttribPtr(0, 3, 3 * sizeof(float), nullptr);
 
 	// zbuffer
 	glEnable(GL_DEPTH_TEST);
@@ -105,8 +111,9 @@ int main()
 	//------------
 	// debug info
 	//------------
-	int minFps = INT_MAX, maxFps = INT_MIN;
-	float startTime = static_cast<float>(glfwGetTime());
+	int minFps = INT_MAX;
+	int maxFps = INT_MIN;
+	const float startTime = static_cast<float>(glfwGetTime());
 
 	//main loop
 	while (!glfwWindowShouldClose(window.Get()))
@@ -128,14 +135,12 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		cubeShader.Use();
-		cubeShader.SetVec3("objectColor", 1.0f, 0.5f, 0.31f); //coral color
+		cubeShader.SetVec3("objectColor", 0.8f, 1.0f, 0.11f);
 		cubeShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		
 		glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 model(1.0f);
-		model = glm::translate(model, lightPos);
-		model = glm::scale(model, glm::vec3(1.0f));
 		glm::mat4 mvp;
 		mvp = projection * view * model;
 		cubeShader.Use();
@@ -145,7 +150,6 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		
 		lampShader.Use();
-		model = glm::mat4(1.0f);
 		model = glm::translate(model, lightPos);
 		model = glm::scale(model, glm::vec3(0.2f));
 
@@ -159,7 +163,7 @@ int main()
 		glfwPollEvents();
 	}
 
-	float endTime = static_cast<float>(glfwGetTime());
+	const float endTime = static_cast<float>(glfwGetTime());
 
 	std::cout << "MIN FPS: " << minFps << std::endl << "MAX FPS: " << maxFps << std::endl << "APP WORK TIME: " << endTime - startTime << std::endl;
 

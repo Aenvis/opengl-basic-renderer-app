@@ -15,11 +15,6 @@ namespace renderer
 
 		glfwMakeContextCurrent(m_window);
 		glfwSetFramebufferSizeCallback(m_window, FramebufferSizeCallback);
-
-		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-		{
-			std::cout << "ERROR::GLAD::INITIALIZATION_FAILED\n";
-		}
 	}
 	MainWindow::~MainWindow()
 	{
