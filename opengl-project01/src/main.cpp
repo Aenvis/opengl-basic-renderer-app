@@ -29,7 +29,6 @@ const unsigned int SCREEN_HEIGHT = 720;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
 //mouse input
 Camera camera(glm::vec3(1.0f, 1.0f, 5.0f));
 float lastX = SCREEN_WIDTH / 2.0f;
