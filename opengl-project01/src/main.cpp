@@ -35,6 +35,7 @@ Camera camera(glm::vec3(1.0f, 1.0f, 5.0f));
 float lastX = SCREEN_WIDTH / 2.0f;
 float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouseInput = true;
+bool isMouseFocused = true;
 
 glm::vec3 lightPos(1.0f, 2.0f, 2.0f);
 
@@ -253,7 +254,11 @@ void Init(unsigned int major, unsigned int minor)
 void ProcessInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, 1);
+	{
+			isMouseFocused = !isMouseFocused;
+			if (isMouseFocused) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			else glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -267,6 +272,7 @@ void ProcessInput(GLFWwindow* window)
 
 void mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 {
+	if (!isMouseFocused) return;
 	float xpos = static_cast<float>(xposIn);
 	float ypos = static_cast<float>(yposIn);
 
