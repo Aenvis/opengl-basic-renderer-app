@@ -32,7 +32,7 @@ float lastX = SCREEN_WIDTH / 2.0f;
 float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouseInput = true;
 
-const glm::vec3 lightPos(1.0f, 0.75f, 2.0f);
+glm::vec3 lightPos(1.0f, 0.75f, 2.0f);
 
 int main()
 {
@@ -135,6 +135,10 @@ int main()
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		lightPos.x = 1.0f + sin(static_cast<float>(glfwGetTime()) / 2);
+		lightPos.y = cos(static_cast<float>(glfwGetTime()));
+		lightPos.z = 2.0f * sin(static_cast<float>(glfwGetTime()) / 2);
+
 		cubeShader.Use();
 		cubeShader.SetVec3("lightPos", lightPos);
 		cubeShader.SetVec3("cameraPos", camera.GetPosition());
@@ -147,6 +151,7 @@ int main()
 		glm::mat4 mvp;
 		mvp = projection * view * model;
 		cubeShader.Use();
+		cubeShader.SetMat4("view", view);
 		cubeShader.SetMat4("model", model);
 		cubeShader.SetMat4("mvp", mvp);
 		
