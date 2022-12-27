@@ -11,6 +11,7 @@
 #include "renderer/Window.h"
 #include "renderer/Texture.h"
 #include "renderer/Camera.h"
+#include <vector>
 
 using namespace renderer;
 
@@ -32,7 +33,7 @@ float lastX = SCREEN_WIDTH / 2.0f;
 float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouseInput = true;
 
-glm::vec3 lightPos(1.0f, 0.75f, 2.0f);
+glm::vec3 lightPos(1.0f, 2.0f, 2.0f);
 
 int main()
 {
@@ -95,13 +96,43 @@ int main()
 	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
 
+	std::vector<glm::vec3> cubePositions{
+	glm::vec3(0.0f, 0.0f, 0.0f),
+	glm::vec3(2.0f, 0.0f, 0.0f),
+	glm::vec3(4.0f, 0.0f, 0.0f),
+	glm::vec3(0.0f, 2.0f, 0.0f),
+	glm::vec3(2.0f, 2.0f, 0.0f),
+	glm::vec3(4.0f, 2.0f, 0.0f),
+	glm::vec3(0.0f, 4.0f, 0.0f),
+	glm::vec3(2.0f, 4.0f, 0.0f),
+	glm::vec3(4.0f, 4.0f, 0.0f),
+	glm::vec3(0.0f, 0.0f, 2.0f),
+	glm::vec3(2.0f, 0.0f, 2.0f),
+	glm::vec3(4.0f, 0.0f, 2.0f),
+	glm::vec3(0.0f, 2.0f, 2.0f),
+	glm::vec3(2.0f, 2.0f, 2.0f),
+	glm::vec3(4.0f, 2.0f, 2.0f),
+	glm::vec3(0.0f, 4.0f, 2.0f),
+	glm::vec3(2.0f, 4.0f, 2.0f),
+	glm::vec3(4.0f, 4.0f, 2.0f),
+	glm::vec3(0.0f, 0.0f, 4.0f),
+	glm::vec3(2.0f, 0.0f, 4.0f),
+	glm::vec3(4.0f, 0.0f, 4.0f),
+	glm::vec3(0.0f, 2.0f, 4.0f),
+	glm::vec3(2.0f, 2.0f, 4.0f),
+	glm::vec3(4.0f, 2.0f, 4.0f),
+	glm::vec3(0.0f, 4.0f, 4.0f),
+	glm::vec3(2.0f, 4.0f, 4.0f),
+	glm::vec3(4.0f, 4.0f, 4.0f),
+	};
+
 	VertexArray cubeVAO;
 	VertexBuffer vBuffer(vertices, sizeof(vertices));
 
 	// position attribute
 	cubeVAO.VertexAttribPtr(0, 3, 6 * sizeof(float), nullptr);
-	cubeVAO.VertexAttribPtr(1, 3, 6 * sizeof(float), (void*)(3*sizeof(float)));
-	
+	cubeVAO.VertexAttribPtr(1, 3, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+
 	VertexArray lampVAO;
 	vBuffer.Bind();
 	lampVAO.VertexAttribPtr(0, 3, 6 * sizeof(float), nullptr);
@@ -135,29 +166,35 @@ int main()
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		lightPos.x = 1.0f + sin(static_cast<float>(glfwGetTime()) / 2);
-		lightPos.y = cos(static_cast<float>(glfwGetTime()));
-		lightPos.z = 2.0f * sin(static_cast<float>(glfwGetTime()) / 2);
+		lightPos.x = 6.0f * sin(static_cast<float>(glfwGetTime()));
+		lightPos.z = 6.0f * cos(static_cast<float>(glfwGetTime()));
 
 		cubeShader.Use();
 		cubeShader.SetVec3("lightPos", lightPos);
 		cubeShader.SetVec3("cameraPos", camera.GetPosition());
 		cubeShader.SetVec3("objectColor", 0.2f, 0.7f, 0.91f);
 		cubeShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		
+
 		glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
+
+		cubeVAO.Bind();
+		for (size_t i = 0; i < cubePositions.size(); i++)
+		{
+			glm::mat4 model(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+			cubeShader.SetMat4("model", model);
+			glm::mat4 mvp;
+			mvp = projection * view * model;
+			cubeShader.Use();
+			cubeShader.SetMat4("view", view);
+			cubeShader.SetMat4("mvp", mvp);
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}	
+		
 		glm::mat4 model(1.0f);
 		glm::mat4 mvp;
-		mvp = projection * view * model;
-		cubeShader.Use();
-		cubeShader.SetMat4("view", view);
-		cubeShader.SetMat4("model", model);
-		cubeShader.SetMat4("mvp", mvp);
-		
-		cubeVAO.Bind();
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		
 		lampShader.Use();
 		model = glm::translate(model, lightPos);
 		model = glm::scale(model, glm::vec3(0.2f));
