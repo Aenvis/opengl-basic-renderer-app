@@ -1,4 +1,8 @@
 #include <iostream>
+#include <vector>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -11,7 +15,6 @@
 #include "renderer/Window.h"
 #include "renderer/Texture.h"
 #include "renderer/Camera.h"
-#include <vector>
 
 using namespace renderer;
 
@@ -137,6 +140,14 @@ int main()
 	vBuffer.Bind();
 	lampVAO.VertexAttribPtr(0, 3, 6 * sizeof(float), nullptr);
 
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window.Get(), true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+
+
 	// zbuffer
 	glEnable(GL_DEPTH_TEST);
 
@@ -165,6 +176,10 @@ int main()
 
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 
 		lightPos.x = 6.0f * sin(static_cast<float>(glfwGetTime()));
 		lightPos.z = 6.0f * cos(static_cast<float>(glfwGetTime()));
@@ -205,6 +220,13 @@ int main()
 		lampVAO.Bind();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+		ImGui::Begin("IMGUI window");
+		ImGui::Text("github/Aenvis");
+		ImGui::End();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		glfwSwapBuffers(window.Get());
 		glfwPollEvents();
 	}
@@ -213,6 +235,10 @@ int main()
 
 	std::cout << "MIN FPS: " << minFps << std::endl << "MAX FPS: " << maxFps << std::endl << "APP WORK TIME: " << endTime - startTime << std::endl;
 
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+	
 	return 0;
 }
 
