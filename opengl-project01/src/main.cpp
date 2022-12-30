@@ -25,14 +25,14 @@ void ProcessInput(GLFWwindow* window);
 void mouseCallback(GLFWwindow* window, double xposIn, double yposIn);
 void scrollCallback(GLFWwindow* window, double xpos, double ypos);
 
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
 //-------------
 // SCREEN
 //-------------
 const unsigned int SCREEN_WIDTH = 1280;
 const unsigned int SCREEN_HEIGHT = 720;
-
-float deltaTime = 0.0f;
-float lastFrame = 0.0f;
 
 //-------------
 // MOUSE INPUT
@@ -46,14 +46,17 @@ bool isMouseFocused = true;
 //-------------
 // RENDER PARAMS
 //-------------
-glm::vec3 lightPos(1.0f, 2.0f, 2.0f);
-float ambientStrength = 0.0f;
-float specularStrength = 0.5f;
-int specularCoeff = 4;
-float lampSpeedMultiplicator = 1.0f;
-float lampMoveRange = 1.0f;
 int main()
 {
+	glm::vec3 lightSourcePos(1.0f, 2.0f, 2.0f);
+	float lightSourceColor[] = { 1.0f, 1.0f, 1.0f , 1.0f };
+	float ambient[] = { 0.0f, 0.0f, 0.0f };
+	float diffuse[] = { 0.0f, 0.0f, 0.0f };
+	float specular[] = { 0.0f, 0.0f, 0.0f };
+	int shininess = 4;
+	float lampSpeedMultiplicator = 1.0f;
+	float lampMoveRange = 1.0f;
+
 	Init(3, 3);
 
 	MainWindow window(SCREEN_WIDTH, SCREEN_HEIGHT, "Wojtek");
@@ -146,7 +149,9 @@ int main()
 	VertexArray cubeVAO;
 	VertexBuffer vBuffer(vertices, sizeof(vertices));
 
-	// position attribute
+	//------------
+	// cube attributes
+	//------------
 	cubeVAO.VertexAttribPtr(0, 3, 6 * sizeof(float), nullptr);
 	cubeVAO.VertexAttribPtr(1, 3, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
@@ -162,7 +167,9 @@ int main()
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 
-	// zbuffer
+	//------------
+	// z-buffer
+	//------------
 	glEnable(GL_DEPTH_TEST);
 
 	//------------
@@ -174,13 +181,15 @@ int main()
 
 	const char* specularCoefficients[] = { "1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024" };
 
-	//main loop
+	//------------
+	// main loop
+	//------------
 	while (!glfwWindowShouldClose(window.Get()))
 	{
 		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
-		int fps = static_cast<int>(1.0f / deltaTime);
+		int fps = static_cast<int>(1.0f / deltaTime); 
 
 		if (fps < minFps) minFps = fps;
 		else if (fps > maxFps) maxFps = fps;
@@ -197,16 +206,16 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		lightPos.x = lampMoveRange * sin(static_cast<float>(glfwGetTime()) * lampSpeedMultiplicator);
-		lightPos.z = lampMoveRange * cos(static_cast<float>(glfwGetTime()) * lampSpeedMultiplicator);
+		lightSourcePos.x = lampMoveRange * sin(static_cast<float>(glfwGetTime()) * lampSpeedMultiplicator);
+		lightSourcePos.z = lampMoveRange * cos(static_cast<float>(glfwGetTime()) * lampSpeedMultiplicator);
 
 		cubeShader.Use();
-		cubeShader.SetVec3("lightPos", lightPos);
-		cubeShader.SetFloat("ambientStrength", ambientStrength);
-		cubeShader.SetFloat("specularStrength", specularStrength);
-		cubeShader.SetInt("specularCoefficient", glm::pow(2, specularCoeff));
-		cubeShader.SetVec3("objectColor", 0.2f, 0.7f, 0.91f);
-		cubeShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		cubeShader.SetVec3("lightPos", lightSourcePos);
+		cubeShader.SetVec3("material.ambient", ambient[0], ambient[1], ambient[2]);
+		cubeShader.SetVec3("material.diffuse", diffuse[0], diffuse[1], diffuse[2]);
+		cubeShader.SetVec3("material.specular", specular[0], specular[1], specular[2]);
+		cubeShader.SetFloat("material.shininess", glm::pow(2.0f, shininess));
+		cubeShader.SetVec3("lightColor", lightSourceColor[0], lightSourceColor[1], lightSourceColor[2]);
 
 		glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -229,7 +238,8 @@ int main()
 		glm::mat4 model(1.0f);
 		glm::mat4 mvp;
 		lampShader.Use();
-		model = glm::translate(model, lightPos);
+		lampShader.SetVec3("lampColor", lightSourceColor[0], lightSourceColor[1], lightSourceColor[2]);
+		model = glm::translate(model, lightSourcePos);
 		model = glm::scale(model, glm::vec3(0.2f));
 
 		mvp = projection * view * model;
@@ -239,13 +249,14 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		ImGui::Begin("Cube Material Params");
-		ImGui::SliderFloat("ambient", &ambientStrength, 0.0f, 1.0f);
-		ImGui::SliderFloat("specular", &specularStrength, 0.0f, 1.0f);
-		ImGui::SliderFloat("specular", &specularStrength, 0.0f, 1.0f);
-		ImGui::ListBox("Specular coeff", &specularCoeff, specularCoefficients, IM_ARRAYSIZE(specularCoefficients));
+		ImGui::ColorEdit3("Ambient", ambient);
+		ImGui::ColorEdit3("Diffuse", diffuse);
+		ImGui::DragFloat3("specular", specular);
+		ImGui::ListBox("Specular coeff", &shininess, specularCoefficients, IM_ARRAYSIZE(specularCoefficients));
 		ImGui::End();
 
 		ImGui::Begin("Lamp Params");
+		ImGui::ColorEdit3("Light Source color", lightSourceColor);
 		ImGui::SliderFloat("Move Speed", &lampSpeedMultiplicator, 0.0f, 3.0f);
 		ImGui::SliderFloat("Move Range", &lampMoveRange, 0.0f, 8.0f);
 		ImGui::End();
