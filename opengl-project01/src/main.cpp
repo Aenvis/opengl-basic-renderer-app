@@ -53,6 +53,9 @@ int main()
 	glm::vec3 ambient = { 0.0f, 0.0f, 0.0f };
 	glm::vec3 diffuse = { 0.0f, 0.0f, 0.0f };
 	glm::vec3 specular = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 lsAmbient = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 lsDiffuse = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 lsSpecular = { 0.0f, 0.0f, 0.0f };
 	float shininess = 0.0f;
 	float lampSpeedMultiplicator = 1.0f;
 	float lampMoveRange = 1.0f;
@@ -179,8 +182,6 @@ int main()
 	int maxFps = INT_MIN;
 	const float startTime = static_cast<float>(glfwGetTime());
 
-	const char* specularCoefficients[] = { "1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024" };
-
 	//------------
 	// main loop
 	//------------
@@ -210,12 +211,14 @@ int main()
 		lightSourcePos.z = lampMoveRange * cos(static_cast<float>(glfwGetTime()) * lampSpeedMultiplicator);
 
 		cubeShader.Use();
-		cubeShader.SetVec3("lightPos", lightSourcePos);
-		cubeShader.SetVec3("material.ambient", ambient[0], ambient[1], ambient[2]);
-		cubeShader.SetVec3("material.diffuse", diffuse[0], diffuse[1], diffuse[2]);
-		cubeShader.SetVec3("material.specular", specular[0], specular[1], specular[2]);
+		cubeShader.SetVec3("material.ambient", ambient);
+		cubeShader.SetVec3("material.diffuse", diffuse);
+		cubeShader.SetVec3("material.specular", specular);
 		cubeShader.SetFloat("material.shininess", glm::pow(2.0f, shininess));
-		cubeShader.SetVec3("lightColor", lightSourceColor[0], lightSourceColor[1], lightSourceColor[2]);
+		cubeShader.SetVec3("lightPos", lightSourcePos);
+		cubeShader.SetVec3("lightSource.ambient", lsAmbient);
+		cubeShader.SetVec3("lightSource.diffuse", lsDiffuse);
+		cubeShader.SetVec3("lightSource.specular", lsSpecular);
 
 		glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -238,7 +241,7 @@ int main()
 		glm::mat4 model(1.0f);
 		glm::mat4 mvp;
 		lampShader.Use();
-		lampShader.SetVec3("lampColor", lightSourceColor[0], lightSourceColor[1], lightSourceColor[2]);
+		lampShader.SetVec3("lampColor", lightSourceColor);
 		model = glm::translate(model, lightSourcePos);
 		model = glm::scale(model, glm::vec3(0.2f));
 
@@ -249,16 +252,17 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		ImGui::Begin("Cube Material Params");
-		ImGui::DragFloat3("Ambient", &ambient.x, 0.001f, 0.0f, 1.0f);
-		ImGui::DragFloat3("Diffuse", &diffuse.x, 0.001f, 0.0f, 1.0f);
-		ImGui::DragFloat3("Specular", &specular.x, 0.001f, 0.0f, 1.0f);
+		ImGui::InputFloat3("Ambient", &ambient.x);
+		ImGui::InputFloat3("Diffuse", &diffuse.x);
+		ImGui::InputFloat3("Specular", &specular.x);
 		ImGui::InputFloat("Shininess", &shininess);
 		ImGui::End();
 
 		ImGui::Begin("Lamp Params");
-		ImGui::ColorEdit3("Light Source color", &lightSourceColor.x);
-		ImGui::SliderFloat("Move Speed", &lampSpeedMultiplicator, 0.0f, 3.0f);
-		ImGui::SliderFloat("Move Range", &lampMoveRange, 0.0f, 8.0f);
+		ImGui::InputFloat3("Light Source ambient", &lsAmbient.x);
+		ImGui::InputFloat3("Light Source diffuse", &lsDiffuse.x);
+		ImGui::InputFloat3("Light Source specular", &lsSpecular.x);
+		ImGui::InputFloat3("Light Source Position", &lightSourcePos.x);
 		ImGui::End();
 
 		ImGui::Render();
