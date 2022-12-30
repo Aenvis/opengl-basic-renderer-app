@@ -49,11 +49,11 @@ bool isMouseFocused = true;
 int main()
 {
 	glm::vec3 lightSourcePos(1.0f, 2.0f, 2.0f);
-	float lightSourceColor[] = { 1.0f, 1.0f, 1.0f , 1.0f };
-	float ambient[] = { 0.0f, 0.0f, 0.0f };
-	float diffuse[] = { 0.0f, 0.0f, 0.0f };
-	float specular[] = { 0.0f, 0.0f, 0.0f };
-	int shininess = 4;
+	glm::vec3 lightSourceColor = { 1.0f, 1.0f, 1.0f};
+	glm::vec3 ambient = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 diffuse = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 specular = { 0.0f, 0.0f, 0.0f };
+	float shininess = 0.0f;
 	float lampSpeedMultiplicator = 1.0f;
 	float lampMoveRange = 1.0f;
 
@@ -249,14 +249,14 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		ImGui::Begin("Cube Material Params");
-		ImGui::ColorEdit3("Ambient", ambient);
-		ImGui::ColorEdit3("Diffuse", diffuse);
-		ImGui::DragFloat3("specular", specular);
-		ImGui::ListBox("Specular coeff", &shininess, specularCoefficients, IM_ARRAYSIZE(specularCoefficients));
+		ImGui::DragFloat3("Ambient", &ambient.x, 0.001f, 0.0f, 1.0f);
+		ImGui::DragFloat3("Diffuse", &diffuse.x, 0.001f, 0.0f, 1.0f);
+		ImGui::DragFloat3("Specular", &specular.x, 0.001f, 0.0f, 1.0f);
+		ImGui::InputFloat("Shininess", &shininess);
 		ImGui::End();
 
 		ImGui::Begin("Lamp Params");
-		ImGui::ColorEdit3("Light Source color", lightSourceColor);
+		ImGui::ColorEdit3("Light Source color", &lightSourceColor.x);
 		ImGui::SliderFloat("Move Speed", &lampSpeedMultiplicator, 0.0f, 3.0f);
 		ImGui::SliderFloat("Move Range", &lampMoveRange, 0.0f, 8.0f);
 		ImGui::End();
