@@ -60,6 +60,8 @@ int main()
 	float lampSpeedMultiplicator = 1.0f;
 	float lampMoveRange = 1.0f;
 
+	int renderedCubeCount = 0;
+	
 	Init(3, 3);
 
 	MainWindow window(SCREEN_WIDTH, SCREEN_HEIGHT, "Wojtek");
@@ -223,8 +225,10 @@ int main()
 		glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 
+		if (renderedCubeCount > cubePositions.size()) renderedCubeCount = cubePositions.size();
+
 		cubeVAO.Bind();
-		for (size_t i = 0; i < cubePositions.size(); i++)
+		for (size_t i = 0; i < renderedCubeCount; i++)
 		{
 			glm::mat4 model(1.0f);
 			model = glm::translate(model, cubePositions[i]);
@@ -256,6 +260,8 @@ int main()
 		ImGui::InputFloat3("Diffuse", &diffuse.x);
 		ImGui::InputFloat3("Specular", &specular.x);
 		ImGui::InputFloat("Shininess", &shininess);
+		ImGui::InputInt("Cubes count: ", &renderedCubeCount);
+
 		ImGui::End();
 
 		ImGui::Begin("Lamp Params");
