@@ -49,7 +49,7 @@ bool isMouseFocused = true;
 int main()
 {
 	glm::vec3 lightSourcePos(1.0f, 2.0f, 2.0f);
-	glm::vec3 lightSourceColor = { 1.0f, 1.0f, 1.0f};
+	glm::vec3 lightSourceColor = { 1.0f, 1.0f, 1.0f };
 	glm::vec3 ambient = { 0.0f, 0.0f, 0.0f };
 	glm::vec3 diffuse = { 0.0f, 0.0f, 0.0f };
 	glm::vec3 specular = { 0.0f, 0.0f, 0.0f };
@@ -190,7 +190,7 @@ int main()
 		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
-		int fps = static_cast<int>(1.0f / deltaTime); 
+		int fps = static_cast<int>(1.0f / deltaTime);
 
 		if (fps < minFps) minFps = fps;
 		else if (fps > maxFps) maxFps = fps;
@@ -200,8 +200,8 @@ int main()
 
 		ProcessInput(window.Get());
 
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -236,8 +236,8 @@ int main()
 			cubeShader.SetMat4("mvp", mvp);
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}	
-		
+		}
+
 		glm::mat4 model(1.0f);
 		glm::mat4 mvp;
 		lampShader.Use();
@@ -269,8 +269,8 @@ int main()
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		glfwSwapBuffers(window.Get());
-        glfwPollEvents();
-    }
+		glfwPollEvents();
+	}
 
 	const float endTime = static_cast<float>(glfwGetTime());
 
@@ -279,7 +279,7 @@ int main()
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
-	
+
 	return 0;
 }
 
@@ -290,14 +290,14 @@ void Init(unsigned int major, unsigned int minor)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 }
- 
+
 void ProcessInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
-			isMouseFocused = !isMouseFocused;
-			if (isMouseFocused) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			else glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		isMouseFocused = !isMouseFocused;
+		if (isMouseFocused) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		else glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -335,5 +335,3 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
-
-
