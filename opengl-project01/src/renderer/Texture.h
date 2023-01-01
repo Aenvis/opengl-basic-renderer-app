@@ -8,6 +8,7 @@ namespace renderer
 		unsigned int m_textureID;
 	public:
 		Texture();
+		Texture(const char* filename, bool isPng);
 		~Texture();
 		
 		void Load(const char* filename, bool isPng);
