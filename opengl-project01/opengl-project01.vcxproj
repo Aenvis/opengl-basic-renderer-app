@@ -217,6 +217,8 @@
     <Image Include="awesomeface.png" />
     <Image Include="capybara.png" />
     <Image Include="container.jpg" />
+    <Image Include="container.png" />
+    <Image Include="container_specular.png" />
     <Image Include="frame.png" />
     <Image Include="loveframe.png" />
   </ItemGroup>

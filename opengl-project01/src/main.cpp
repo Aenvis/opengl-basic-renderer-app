@@ -35,13 +35,14 @@ const unsigned int SCREEN_WIDTH = 1280;
 const unsigned int SCREEN_HEIGHT = 720;
 
 //-------------
-// MOUSE INPUT
+// USER INPUT
 //-------------
 Camera camera(glm::vec3(1.0f, 1.0f, 5.0f));
 float lastX = SCREEN_WIDTH / 2.0f;
 float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouseInput = true;
 bool isMouseFocused = true;
+bool showLampParam = false;
 
 //-------------
 // RENDER PARAMS
@@ -49,9 +50,7 @@ bool isMouseFocused = true;
 int main()
 {
 	glm::vec3 lightSourcePos(1.0f, 2.0f, 2.0f);
-	glm::vec3 lightSourceColor = { 1.0f, 1.0f, 1.0f };
-	glm::vec3 ambient = { 0.0f, 0.0f, 0.0f };
-	glm::vec3 diffuse = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 lightSourceColor = { 1.0f, 1.0f, 1.0f }; //only defines color of the lamp cube
 	glm::vec3 specular = { 0.0f, 0.0f, 0.0f };
 	glm::vec3 lsAmbient = { 0.2f, 0.2f, 0.2f };
 	glm::vec3 lsDiffuse = { 0.5f, 0.5f, 0.5f };
@@ -172,8 +171,15 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	Texture specularMap("container_specular.png", true);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 	cubeShader.Use();
 	cubeShader.SetInt("material.diffuse", 0);
+	cubeShader.SetInt("material.specular", 1);
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -238,6 +244,8 @@ int main()
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, diffuseMap.GetID());
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularMap.GetID());
 		cubeVAO.Bind();
 
 		for (size_t i = 0; i < renderedCubeCount; i++)
@@ -267,6 +275,7 @@ int main()
 		lampVAO.Bind();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+		//TODO: LOAD MAPS THROUGH IMGUI 
 		ImGui::Begin("Cube Material Params");
 		ImGui::InputFloat3("Specular", &specular.x);
 		ImGui::InputFloat("Shininess", &shininess);
@@ -274,12 +283,15 @@ int main()
 
 		ImGui::End();
 
-		ImGui::Begin("Lamp Params");
-		ImGui::InputFloat3("Light Source ambient", &lsAmbient.x);
-		ImGui::InputFloat3("Light Source diffuse", &lsDiffuse.x);
-		ImGui::InputFloat3("Light Source specular", &lsSpecular.x);
-		ImGui::InputFloat3("Light Source Position", &lightSourcePos.x);
-		ImGui::End();
+		if (showLampParam)
+		{
+			ImGui::Begin("Lamp Params");
+			ImGui::InputFloat3("Light Source ambient", &lsAmbient.x);
+			ImGui::InputFloat3("Light Source diffuse", &lsDiffuse.x);
+			ImGui::InputFloat3("Light Source specular", &lsSpecular.x);
+			ImGui::InputFloat3("Light Source Position", &lightSourcePos.x);
+			ImGui::End();
+		}
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -315,7 +327,8 @@ void ProcessInput(GLFWwindow* window)
 		if (isMouseFocused) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		else glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
-
+	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+		showLampParam = !showLampParam;	
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.ProcessKeyboard(FORWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
