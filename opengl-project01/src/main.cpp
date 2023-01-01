@@ -176,10 +176,16 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	Texture emissionMap("container_emissive.png", true);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	cubeShader.Use();
 	cubeShader.SetInt("material.diffuse", 0);
 	cubeShader.SetInt("material.specular", 1);
+	cubeShader.SetInt("material.emission", 2);
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -246,6 +252,8 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, diffuseMap.GetID());
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, specularMap.GetID());
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, emissionMap.GetID());
 		cubeVAO.Bind();
 
 		for (size_t i = 0; i < renderedCubeCount; i++)
