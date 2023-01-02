@@ -49,7 +49,7 @@ bool showLampParam = false;
 //-------------
 int main()
 {
-	glm::vec3 lightSourcePos(1.0f, 2.0f, 2.0f);
+	glm::vec3 lightSourcePos(0.2f, 1.0f, 0.3f);
 	glm::vec3 lightSourceColor = { 1.0f, 1.0f, 1.0f }; //only defines color of the lamp cube
 	glm::vec3 specular = { 0.0f, 0.0f, 0.0f };
 	glm::vec3 lsAmbient = { 0.2f, 0.2f, 0.2f };
@@ -232,13 +232,13 @@ int main()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		lightSourcePos.x = lampMoveRange * sin(static_cast<float>(glfwGetTime()) * lampSpeedMultiplicator);
-		lightSourcePos.z = lampMoveRange * cos(static_cast<float>(glfwGetTime()) * lampSpeedMultiplicator);
+		//lightSourcePos.x = lampMoveRange * sin(static_cast<float>(glfwGetTime()) * lampSpeedMultiplicator);
+		//lightSourcePos.z = lampMoveRange * cos(static_cast<float>(glfwGetTime()) * lampSpeedMultiplicator);
 
 		cubeShader.Use();
 		cubeShader.SetVec3("material.specular", specular);
 		cubeShader.SetFloat("material.shininess", glm::pow(2.0f, shininess));
-		cubeShader.SetVec3("lightPos", lightSourcePos);
+		cubeShader.SetVec3("lightSource.direction", -0.2f, -1.0f, -0.3f);
 		cubeShader.SetVec3("lightSource.ambient", lsAmbient);
 		cubeShader.SetVec3("lightSource.diffuse", lsDiffuse);
 		cubeShader.SetVec3("lightSource.specular", lsSpecular);
