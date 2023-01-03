@@ -55,6 +55,9 @@ int main()
 	glm::vec3 lsAmbient = { 0.2f, 0.2f, 0.2f };
 	glm::vec3 lsDiffuse = { 0.5f, 0.5f, 0.5f };
 	glm::vec3 lsSpecular = { 1.0f, 1.0f, 1.0f };
+	float lsConstant = 1.0f;
+	float lsLinear = 0.045f;
+	float lsQuadratic = 0.0075f;
 	float shininess = 0.0f;
 	float lampSpeedMultiplicator = 1.0f;
 	float lampMoveRange = 1.0f;
@@ -238,10 +241,15 @@ int main()
 		cubeShader.Use();
 		cubeShader.SetVec3("material.specular", specular);
 		cubeShader.SetFloat("material.shininess", glm::pow(2.0f, shininess));
-		cubeShader.SetVec3("lightSource.direction", -0.2f, -1.0f, -0.3f);
-		cubeShader.SetVec3("lightSource.ambient", lsAmbient);
-		cubeShader.SetVec3("lightSource.diffuse", lsDiffuse);
-		cubeShader.SetVec3("lightSource.specular", lsSpecular);
+		cubeShader.SetVec3("spotlight.position", camera.GetPosition());
+		cubeShader.SetVec3("spotlight.position", camera.GetForward());
+		cubeShader.SetVec3("spotlight.ambient", lsAmbient);
+		cubeShader.SetVec3("spotlight.diffuse", lsDiffuse);
+		cubeShader.SetVec3("spotlight.specular", lsSpecular);
+		cubeShader.SetFloat("spotlight.cutoff", glm::cos(glm::radians(12.5f)));
+		cubeShader.SetFloat("spotlight.constant", lsConstant);
+		cubeShader.SetFloat("spotlight.linear", lsLinear);
+		cubeShader.SetFloat("spotlight.quadratic", lsQuadratic);
 
 		glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -288,16 +296,18 @@ int main()
 		ImGui::InputFloat3("Specular", &specular.x);
 		ImGui::InputFloat("Shininess", &shininess);
 		ImGui::InputInt("Cubes count: ", &renderedCubeCount);
-
 		ImGui::End();
 
 		if (showLampParam)
 		{
 			ImGui::Begin("Lamp Params");
+			ImGui::InputFloat3("Light Source Position", &lightSourcePos.x);
 			ImGui::InputFloat3("Light Source ambient", &lsAmbient.x);
 			ImGui::InputFloat3("Light Source diffuse", &lsDiffuse.x);
 			ImGui::InputFloat3("Light Source specular", &lsSpecular.x);
-			ImGui::InputFloat3("Light Source Position", &lightSourcePos.x);
+			ImGui::InputFloat("Light Source constant", &lsConstant);
+			ImGui::InputFloat("Light Source linear", &lsLinear);
+			ImGui::InputFloat("Light Source quadratic", &lsQuadratic);
 			ImGui::End();
 		}
 
