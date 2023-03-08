@@ -21,10 +21,10 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{821af091-299e-4aad-8a4d-e637eaf51ce3}</ProjectGuid>
+    <ProjectGuid>{C4C0C640-7A2A-4065-891A-EAA1C6B94BE2}</ProjectGuid>
     <RootNamespace>openglproject01</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>learn-opengl</ProjectName>
+    <ProjectName>renderer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -216,13 +216,13 @@
     <None Include="src\shaders\vertexLight.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="awesomeface.png" />
-    <Image Include="capybara.png" />
-    <Image Include="container.jpg" />
-    <Image Include="container.png" />
-    <Image Include="container_specular.png" />
-    <Image Include="frame.png" />
-    <Image Include="loveframe.png" />
+    <Image Include="assets\awesomeface.png" />
+    <Image Include="assets\capybara.png" />
+    <Image Include="assets\container.jpg" />
+    <Image Include="assets\container_emissive.png" />
+    <Image Include="assets\container_specular.png" />
+    <Image Include="assets\frame.png" />
+    <Image Include="assets\loveframe.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
