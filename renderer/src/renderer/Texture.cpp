@@ -10,6 +10,12 @@ namespace renderer
 		glGenTextures(1, &m_textureID);
 		glBindTexture(GL_TEXTURE_2D, m_textureID);
 	}
+	Texture::Texture(const char* filename, bool isPng)
+	{
+		glGenTextures(1, &m_textureID);
+		glBindTexture(GL_TEXTURE_2D, m_textureID);
+		Load(filename, isPng);
+	}
 	Texture::~Texture()
 	{
 	}

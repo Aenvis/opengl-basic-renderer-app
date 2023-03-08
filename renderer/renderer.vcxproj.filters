@@ -63,6 +63,9 @@
     <ClCompile Include="imgui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\renderer\StaticObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h">
@@ -122,6 +125,9 @@
     <ClInclude Include="imgui\imgui_impl_opengl3_loader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\renderer\StaticObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\vertex.glsl" />
@@ -130,21 +136,28 @@
     <None Include="src\shaders\vertex.glsl" />
     <None Include="src\shaders\fragmentLight.glsl" />
     <None Include="src\shaders\vertexLight.glsl" />
+    <None Include="imgui.ini" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="awesomeface.png">
+    <Image Include="assets\awesomeface.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="capybara.png">
+    <Image Include="assets\capybara.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="container.jpg">
+    <Image Include="assets\container.jpg">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="frame.png">
+    <Image Include="assets\frame.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="loveframe.png">
+    <Image Include="assets\loveframe.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\container_specular.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\container_emissive.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

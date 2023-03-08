@@ -45,6 +45,8 @@ Generated\ Files/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
+.idea/
+
 # NUnit
 *.VisualState.xml
 TestResult.xml
@@ -361,3 +363,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/opengl-project01/src/shaders/vertex.glsl
+/opengl-project01/src/shaders/vertexLight.glsl
+/opengl-project01/src/main.cpp

@@ -46,6 +46,7 @@ namespace renderer
 		inline glm::mat4 GetViewMatrix() const { return glm::lookAt(m_position, m_position + m_forward, m_up); }
 		inline const float GetZoom() const { return m_zoom; }
 		inline const glm::vec3 GetPosition() const { return m_position; }
+		inline const glm::vec3 GetForward() const { return m_forward; }
 		void ProcessKeyboard(CameraMovement direction, float deltaTime);
 		void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true);
 		void ProcessMouseScroll(float yoffset);
