@@ -4425,7 +4425,7 @@ static const stbi_uc stbi__zdefault_distance[32] =
    5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5
 };
 /*
-Init algorithm:
+glfwInit algorithm:
 {
    int i;   // use <= to match clearly with spec
    for (i=0; i <= 143; ++i)     stbi__zdefault_length[i]   = 8;
@@ -7612,7 +7612,7 @@ static int      stbi__pnm_info(stbi__context* s, int* x, int* y, int* comp)
 
     stbi__rewind(s);
 
-    // Get identifier
+    // GetWindow identifier
     p = (char)stbi__get8(s);
     t = (char)stbi__get8(s);
     if (p != 'P' || (t != '5' && t != '6')) {

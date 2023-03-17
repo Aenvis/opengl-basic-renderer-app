@@ -1,19 +1,18 @@
 #pragma once
 #include <GLFW/glfw3.h>
+#include <memory>
+#include <string>
+
 namespace renderer
 {
 	class MainWindow
 	{
 	private:
-		GLFWwindow* m_window;
+		std::shared_ptr<GLFWwindow> m_window;
 
 	public:
-		MainWindow(unsigned int screenWidth, unsigned int screenHeight, const char* windowName);
-		~MainWindow();
+		MainWindow(int screenWidth, int screenHeight, const std::string& windowName);
 
-		inline GLFWwindow* Get() const { return m_window; }
+		GLFWwindow* GetWindow() const { return m_window.get(); }
 	};
-
-	inline void FramebufferSizeCallback(GLFWwindow* window, int width, int height){ glViewport(0, 0, width, height); }
-
 }

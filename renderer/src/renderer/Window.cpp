@@ -3,9 +3,9 @@
 
 namespace renderer
 {
-	MainWindow::MainWindow(unsigned int screenWidth, unsigned int screenHeight, const char* windowName)
+	MainWindow::MainWindow(const int screenWidth, const int screenHeight, const std::string& windowName)
 	{
-		this->m_window = glfwCreateWindow(screenWidth, screenHeight, windowName, NULL, NULL);
+		this->m_window = std::shared_ptr<GLFWwindow>(glfwCreateWindow(screenWidth, screenHeight, windowName.c_str(), nullptr, nullptr));
 
 		if (!m_window)
 		{
@@ -13,11 +13,6 @@ namespace renderer
 			glfwTerminate();
 		}
 
-		glfwMakeContextCurrent(m_window);
-		glfwSetFramebufferSizeCallback(m_window, FramebufferSizeCallback);
-	}
-	MainWindow::~MainWindow()
-	{
-		glfwTerminate();
+		glfwMakeContextCurrent(m_window.get());
 	}
 }
