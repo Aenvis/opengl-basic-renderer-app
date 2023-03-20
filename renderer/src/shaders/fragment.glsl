@@ -36,6 +36,7 @@ struct Spotlight
     vec3 position;
     vec3 direction;
     float cutoff;
+    float outerCutoff;
 
     vec3 ambient;
     vec3 diffuse;

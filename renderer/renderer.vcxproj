@@ -218,7 +218,7 @@
   <ItemGroup>
     <Image Include="assets\awesomeface.png" />
     <Image Include="assets\capybara.png" />
-    <Image Include="assets\container.jpg" />
+    <Image Include="assets\container.png" />
     <Image Include="assets\container_emissive.png" />
     <Image Include="assets\container_specular.png" />
     <Image Include="assets\frame.png" />

@@ -31,6 +31,7 @@ constexpr unsigned int SCREEN_WIDTH = 1280;
 constexpr unsigned int SCREEN_HEIGHT = 720;
 
 Camera camera(glm::vec3(1.0f, 1.0f, 5.0f));
+
 float lastX = SCREEN_WIDTH / 2.0f;
 float lastY = SCREEN_HEIGHT / 2.0f;
 bool firstMouseInput = true;
@@ -39,25 +40,10 @@ bool showLampParam = false;
 
 int main()
 {
-	glm::vec3 lightSourcePos(0.2f, 1.0f, 0.3f);
-	constexpr glm::vec3 lightSourceColor = { 1.0f, 1.0f, 1.0f }; //only defines color of the lamp cube
-
-	glm::vec3 specular = { 0.0f, 0.0f, 0.0f };
-
-	glm::vec3 lsAmbient = { 0.2f, 0.2f, 0.2f };
-	glm::vec3 lsDiffuse = { 0.5f, 0.5f, 0.5f };
-	glm::vec3 lsSpecular = { 1.0f, 1.0f, 1.0f };
-
-	float lsConstant = 1.0f;
-	float lsLinear = 0.045f;
-	float lsQuadratic = 0.0075f;
-	float shininess = 0.0f;
-
-	int renderedCubeCount = 3;
-	
 	glfwInitializationSequence(3, 3);
 
 	MainWindow window(SCREEN_WIDTH, SCREEN_HEIGHT, "Wojtek");
+
 	glfwSetInputMode(window.GetWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetFramebufferSizeCallback(window.GetWindow(), FramebufferSizeCallback);
 	glfwSetCursorPosCallback(window.GetWindow(), mouseCallback);
@@ -67,6 +53,25 @@ int main()
 	{
 		std::cout << "ERROR::GLAD::INITIALIZATION_FAILED\n";
 	}
+
+	Texture diffuseMap("assets/container.png", true);
+	Texture specularMap("assets/container_specular.png", true);
+	Texture emissionMap("assets/container_emissive.png", true);
+
+	glm::vec3 lightSourcePos(0.2f, 1.0f, 0.3f);
+	constexpr glm::vec3 lightSourceColor = { 1.0f, 1.0f, 1.0f }; //only defines color of the lamp cube
+	glm::vec3 lightSourceAmbient = { 0.2f, 0.2f, 0.2f };
+	glm::vec3 lightSourceDiffuse = { 0.5f, 0.5f, 0.5f };
+	glm::vec3 lightSourceSpecular = { 1.0f, 1.0f, 1.0f };
+
+	glm::vec3 specular = { 0.0f, 0.0f, 0.0f };
+
+	float lightSourceConstant = 1.0f;
+	float lightSourceLinear = 0.045f;
+	float lightSourceQuadratic = 0.0075f;
+	float shininess = 0.0f;
+
+	int renderedCubeCount = 3;
 
 	Shader cubeShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
 	Shader lampShader("src/shaders/vertexLight.glsl", "src/shaders/fragmentLight.glsl");
@@ -150,29 +155,12 @@ int main()
 	VertexBuffer vBuffer(vertices, sizeof(vertices));
 
 	cubeVAO.VertexAttribPtr(0, 3, 8 * sizeof(float), nullptr);
-	cubeVAO.VertexAttribPtr(1, 3, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	cubeVAO.VertexAttribPtr(2, 2, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	cubeVAO.VertexAttribPtr(1, 3, 8 * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
+	cubeVAO.VertexAttribPtr(2, 2, 8 * sizeof(float), reinterpret_cast<void*>(6 * sizeof(float)));
 
 	VertexArray lampVAO;
 	vBuffer.Bind();
 	lampVAO.VertexAttribPtr(0, 3, 8 * sizeof(float), nullptr);
-
-	Texture diffuseMap("container.png", true);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	Texture specularMap("container_specular.png", true);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	Texture emissionMap("container_emissive.png", true);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	cubeShader.Use();
 	cubeShader.SetInt("material.diffuse", 0);
@@ -211,13 +199,13 @@ int main()
 		cubeShader.SetFloat("material.shininess", glm::pow(2.0f, shininess));
 		cubeShader.SetVec3("spotlight.position", camera.GetPosition());
 		cubeShader.SetVec3("spotlight.position", camera.GetForward());
-		cubeShader.SetVec3("spotlight.ambient", lsAmbient);
-		cubeShader.SetVec3("spotlight.diffuse", lsDiffuse);
-		cubeShader.SetVec3("spotlight.specular", lsSpecular);
+		cubeShader.SetVec3("spotlight.ambient", lightSourceAmbient);
+		cubeShader.SetVec3("spotlight.diffuse", lightSourceDiffuse);
+		cubeShader.SetVec3("spotlight.specular", lightSourceSpecular);
 		cubeShader.SetFloat("spotlight.cutoff", glm::cos(glm::radians(12.5f)));
-		cubeShader.SetFloat("spotlight.constant", lsConstant);
-		cubeShader.SetFloat("spotlight.linear", lsLinear);
-		cubeShader.SetFloat("spotlight.quadratic", lsQuadratic);
+		cubeShader.SetFloat("spotlight.constant", lightSourceConstant);
+		cubeShader.SetFloat("spotlight.linear", lightSourceLinear);
+		cubeShader.SetFloat("spotlight.quadratic", lightSourceQuadratic);
 
 		glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT), 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -270,12 +258,12 @@ int main()
 		{
 			ImGui::Begin("Lamp Params");
 			ImGui::InputFloat3("Light Source Position", &lightSourcePos.x);
-			ImGui::InputFloat3("Light Source ambient", &lsAmbient.x);
-			ImGui::InputFloat3("Light Source diffuse", &lsDiffuse.x);
-			ImGui::InputFloat3("Light Source specular", &lsSpecular.x);
-			ImGui::InputFloat("Light Source constant", &lsConstant);
-			ImGui::InputFloat("Light Source linear", &lsLinear);
-			ImGui::InputFloat("Light Source quadratic", &lsQuadratic);
+			ImGui::InputFloat3("Light Source ambient", &lightSourceAmbient.x);
+			ImGui::InputFloat3("Light Source diffuse", &lightSourceDiffuse.x);
+			ImGui::InputFloat3("Light Source specular", &lightSourceSpecular.x);
+			ImGui::InputFloat("Light Source constant", &lightSourceConstant);
+			ImGui::InputFloat("Light Source linear", &lightSourceLinear);
+			ImGui::InputFloat("Light Source quadratic", &lightSourceQuadratic);
 			ImGui::End();
 		}
 

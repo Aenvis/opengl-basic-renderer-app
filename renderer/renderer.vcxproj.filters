@@ -145,9 +145,6 @@
     <Image Include="assets\capybara.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="assets\container.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="assets\frame.png">
       <Filter>Resource Files</Filter>
     </Image>
@@ -158,6 +155,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="assets\container_emissive.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\container.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
