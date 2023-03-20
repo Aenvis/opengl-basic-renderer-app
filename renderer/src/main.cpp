@@ -73,8 +73,8 @@ int main()
 
 	int renderedCubeCount = 3;
 
-	Shader cubeShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
-	Shader lampShader("src/shaders/vertexLight.glsl", "src/shaders/fragmentLight.glsl");
+	Shader cubeShader("src/shaders/Cube.vert", "src/shaders/Cube.frag");
+	Shader lampShader("src/shaders/SolidCube.vert", "src/shaders/SolidCube.frag");
 
 	constexpr float vertices[] = {
 		// positions          // normals           // texture coords

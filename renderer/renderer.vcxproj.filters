@@ -132,10 +132,10 @@
   <ItemGroup>
     <None Include="resources\shaders\vertex.glsl" />
     <None Include="resources\shaders\fragment.glsl" />
-    <None Include="src\shaders\fragment.glsl" />
-    <None Include="src\shaders\vertex.glsl" />
-    <None Include="src\shaders\fragmentLight.glsl" />
-    <None Include="src\shaders\vertexLight.glsl" />
+    <None Include="src\shaders\Cube.frag" />
+    <None Include="src\shaders\Cube.vert" />
+    <None Include="src\shaders\SolidCube.frag" />
+    <None Include="src\shaders\SolidCube.vert" />
     <None Include="imgui.ini" />
   </ItemGroup>
   <ItemGroup>
